@@ -10,7 +10,13 @@ dotenv.config();
 const app = express();
 connectDB();
 
-app.use(cors());
+// ✅ CORS (abhi open rakho for testing)
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
+
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
