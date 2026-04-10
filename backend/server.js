@@ -18,11 +18,7 @@ app.use(express.json());
 /* ---------------- CORS CONFIG ---------------- */
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "https://your-frontend.vercel.app", //  CHANGE AFTER DEPLOY
-    ],
+    origin: "https://student-note-1-mgnc.onrender.com",
     credentials: true,
   }),
 );
