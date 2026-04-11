@@ -1,17 +1,17 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://student-note-1-mgnc.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_URL || window.location.origin + "/api",
 });
 
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
+
   if (token) {
-    req.headers.authorization = token;
+    req.headers.Authorization = `Bearer ${token}`;
   }
+
   return req;
 });
 
 export default API;
-// baseURL: "http://localhost:5000/api",
-// baseURL: "https://student-backend-1899.onrender.com/api",

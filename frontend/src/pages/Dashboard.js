@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import API from "../api";
 import NoteCard from "../components/NoteCard";
+import { FileText, Plus, LogOut } from "lucide-react";
 
 export default function Dashboard() {
   const [notes, setNotes] = useState([]);
-  const [form, setForm] = useState({ title: "", body: "" });
+  const [showForm, setShowForm] = useState(false);
+
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
 
   const fetchNotes = async () => {
     const res = await API.get("/notes");
@@ -15,69 +19,91 @@ export default function Dashboard() {
     fetchNotes();
   }, []);
 
+  // ✅ CREATE NOTE
   const createNote = async () => {
-    if (!form.title || !form.body) {
-      alert("Please fill all fields");
-      return;
-    }
+    if (!title || !body) return alert("Fill all fields");
 
-    await API.post("/notes", form);
-    setForm({ title: "", body: "" });
+    await API.post("/notes", { title, body });
+
+    setTitle("");
+    setBody("");
+    setShowForm(false);
+
     fetchNotes();
   };
 
   return (
-    <div className="min-h-screen bg-[#444] text-white p-6">
-      {/* 🔝 Navbar */}
+    <div className="min-h-screen bg-gray-100 p-6">
+      {/* Navbar */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold tracking-wide">My Notes</h1>
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-600 p-2 rounded-lg">
+            <FileText className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold">My Notes</h1>
+            <p className="text-sm text-gray-500">your@email.com</p>
+          </div>
+        </div>
 
-        <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            window.location = "/";
-          }}
-          className="bg-[#999] text-black px-4 py-1 rounded-lg hover:bg-gray-300 transition"
-        >
-          Logout
-        </button>
+        <div className="flex gap-3">
+          {/* ✅ NEW NOTE BUTTON */}
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg"
+          >
+            <Plus size={16} />
+            New Note
+          </button>
+
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              window.location = "/";
+            }}
+            className="flex items-center gap-2 border px-4 py-2 rounded-lg"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
+        </div>
       </div>
 
-      {/* 📝 Create Note */}
-      <div className="bg-[#888] p-6 rounded-2xl shadow-lg border border-gray-700 mb-8 max-w-xl">
-        <h2 className="text-lg mb-4 font-semibold text-white">Create Note</h2>
+      {/* ✅ FORM */}
+      {showForm && (
+        <div className="bg-white p-5 rounded-xl shadow mb-6 max-w-md">
+          <input
+            type="text"
+            placeholder="Title"
+            className="border p-2 w-full mb-2 rounded"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
 
-        <input
-          className="w-full mb-3 px-4 py-2 bg-[#777] border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-          placeholder="Title"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-        />
+          <textarea
+            placeholder="Write your note..."
+            className="border p-2 w-full mb-3 rounded"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+          />
 
-        <textarea
-          className="w-full mb-3 px-4 py-2 bg-[#777] border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-          placeholder="Write your note..."
-          rows={3}
-          value={form.body}
-          onChange={(e) => setForm({ ...form, body: e.target.value })}
-        />
+          <button
+            onClick={createNote}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Save Note
+          </button>
+        </div>
+      )}
 
-        <button
-          onClick={createNote}
-          className="bg-[#999] text-black px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
-        >
-          Add Note
-        </button>
-      </div>
-
-      {/* 📦 Notes Grid */}
+      {/* Notes */}
       <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6">
         {notes.length > 0 ? (
           notes.map((n) => (
             <NoteCard key={n._id} note={n} refresh={fetchNotes} />
           ))
         ) : (
-          <p className="text-gray-400">No notes yet...</p>
+          <p className="text-gray-500">No notes yet...</p>
         )}
       </div>
     </div>
