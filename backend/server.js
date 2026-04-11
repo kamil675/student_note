@@ -48,8 +48,7 @@ app.use("/api/notes", noteRoutes);
 // Static
 app.use(express.static(path.join(process.cwd(), "frontend", "build")));
 
-// React fallback
-app.use((req, res) => {
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(process.cwd(), "frontend", "build", "index.html"));
 });
 
