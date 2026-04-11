@@ -7,16 +7,21 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
 import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
+
+//  Fix __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // DB CONNECT
 connectDB();
 
-//  Middleware
+// Middleware
 app.use(express.json());
 
-// CORS FIX (FINAL 🔥)
+// CORS
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5000",
@@ -25,35 +30,30 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps / postman)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
       } else {
-        return callback(new Error("CORS not allowed"));
+        callback(new Error("CORS not allowed"));
       }
     },
     credentials: true,
   }),
 );
 
-//  Routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/notes", noteRoutes);
 
-//  Static frontend serve
-const __dirname = path.resolve();
-
+// Static
 app.use(express.static(path.join(__dirname, "frontend", "build")));
 
-//  React fallback (Express v5 safe)
+// React fallback
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
 });
 
-//  Server start
+// Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
